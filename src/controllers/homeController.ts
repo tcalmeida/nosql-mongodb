@@ -1,28 +1,38 @@
-import { Request, Response } from 'express';
+import { error } from "console";
+import { Request, Response } from "express";
+import User from "../models/User";
 
-import { Product } from '../models/Product';
-import User from "../models/User"
-
-export const home = async (req: Request, res: Response)=>{
-    let users = await User.find({})
-    console.log("USUARIOS", users)
-
-    let age: number = 90;
-    let showOld: boolean = false;
-
-    if(age > 50) {
-        showOld = true;
+const homeController = {
+  async find(req: Request, res: Response) {
+    try {
+      let user = await User.find({}).sort({ "name.firstName": 1 });
+      return res.status(200).json(user);
+    } catch {
+      return res.status(500).json("Não foi possível realizar a ação");
     }
+  },
 
-    let list = Product.getAll();
-    let expensiveList = Product.getFromPriceAfter(12);
+  async create(req: Request, res: Response) {
+    try {
+      const { firstName, lastName, email, age, interests } = req.body;
+      const parseAge = parseInt(age.req.body);
 
-    res.render('pages/home', {
-        name: 'Bonieky',
-        lastName: 'Lacerda',
-        showOld,
-        products: list,
-        expensives: expensiveList,
-        frasesDoDia: []
-    });
+      const newUser = await User.create({
+        name: {
+            firstName: firstName,
+            lastName: lastName,
+        },
+        email,
+        age: parseAge,
+        interests
+      });
+      return res.status(201).json(newUser);
+    } catch {
+        console.error()
+      return res.status(500).json("nao foi possivel cadastrar")
+      
+    }
+  },
 };
+
+export default homeController;
